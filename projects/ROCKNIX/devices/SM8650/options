@@ -7,7 +7,7 @@
     TARGET_CPU="cortex-x4"
     TARGET_CPU_FLAGS="+fp16+crypto+i8mm+bf16+memtag+sm4+sha3+nosve+nosve2"
 
-    PARTITION_TABLE="gpt"
+    DISK_LABEL="gpt"
     HW_CPU="Snapdragon 8 Gen3"
     ENABLE_32BIT="no"
 

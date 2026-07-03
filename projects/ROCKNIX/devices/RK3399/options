@@ -18,7 +18,7 @@
         ;;
     esac
 
-    PARTITION_TABLE="gpt"
+    DISK_LABEL="gpt"
     HW_CPU="Rockchip RK3399"
 
   # Kernel target
