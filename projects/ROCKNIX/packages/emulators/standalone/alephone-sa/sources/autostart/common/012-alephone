@@ -1,0 +1,23 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
+
+AONE_ROMS="/storage/roms/alephone"
+
+[ -d "${AONE_ROMS}" ] || exit 0
+[ -f "${AONE_ROMS}/.disable_alephone_seed" ] && exit 0
+
+for dir in "${AONE_ROMS}"/*/; do
+  [ -d "${dir}" ] || continue
+
+  found=""
+  for shapes in "${dir}"Shapes.shp*; do
+    [ -e "${shapes}" ] && { found=1; break; }
+  done
+  [ -n "${found}" ] || continue
+
+  name=$(basename "${dir}")
+  rom="${AONE_ROMS}/${name}.alephone"
+  [ -e "${rom}" ] && continue
+  printf 'SCENARIO=%s\n' "${dir%/}" > "${rom}"
+done

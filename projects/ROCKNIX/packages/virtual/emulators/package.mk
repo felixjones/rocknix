@@ -8,7 +8,7 @@ PKG_SECTION="emulation" # Do not change to virtual or makeinstall_target will no
 PKG_LONGDESC="Emulation metapackage."
 PKG_TOOLCHAIN="manual"
 
-PKG_EMUS="amiberry duckstation-sa flycast-sa gzdoom-sa hatarisa hypseus-singe moonlight mupen64plus-sa openbor pico-8   \
+PKG_EMUS="alephone-sa amiberry duckstation-sa flycast-sa gzdoom-sa hatarisa hypseus-singe moonlight mupen64plus-sa openbor pico-8   \
           ppsspp-sa scummvmsa touchhle-sa vice-sa wine yabasanshiro-sa"
 
 EMUS_32BIT=""
@@ -1658,6 +1658,10 @@ makeinstall_target() {
   add_emu_core doom gzdoom gzdoom-sa true
   add_emu_core doom retroarch prboom false
   add_es_system doom
+
+  ### Aleph One
+  add_emu_core alephone alephone alephone-sa true
+  add_es_system alephone
 
   ### Media Player
   add_emu_core mplayer mplayer mplayer true
