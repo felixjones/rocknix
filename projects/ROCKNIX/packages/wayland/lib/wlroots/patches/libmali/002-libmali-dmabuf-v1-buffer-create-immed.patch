@@ -1,0 +1,54 @@
+diff --git a/include/wlr/types/wlr_linux_dmabuf_v1.h b/include/wlr/types/wlr_linux_dmabuf_v1.h
+index 2193f91..2aae22d 100644
+--- a/include/wlr/types/wlr_linux_dmabuf_v1.h
++++ b/include/wlr/types/wlr_linux_dmabuf_v1.h
+@@ -134,4 +134,7 @@ struct wlr_linux_dmabuf_feedback_v1_init_options {
+ bool wlr_linux_dmabuf_feedback_v1_init_with_options(struct wlr_linux_dmabuf_feedback_v1 *feedback,
+ 	const struct wlr_linux_dmabuf_feedback_v1_init_options *options);
+ 
++struct wl_resource *wlr_dmabuf_v1_buffer_create_immed(
++		struct wl_client *client, uint32_t buffer_id,
++		struct wlr_dmabuf_attributes *attribs);
+ #endif
+diff --git a/types/wlr_linux_dmabuf_v1.c b/types/wlr_linux_dmabuf_v1.c
+index 3165e88..dd9297e 100644
+--- a/types/wlr_linux_dmabuf_v1.c
++++ b/types/wlr_linux_dmabuf_v1.c
+@@ -1173,3 +1173,37 @@ error:
+ 	wlr_linux_dmabuf_feedback_v1_finish(feedback);
+ 	return false;
+ }
++struct wl_resource *wlr_dmabuf_v1_buffer_create_immed(
++		struct wl_client *client, uint32_t buffer_id,
++		struct wlr_dmabuf_attributes *attribs) {
++	if (attribs->width < 1 || attribs->height < 1) {
++		wlr_log(WLR_ERROR, "wlr_dmabuf_v1_buffer_create_immed: invalid dimensions %dx%d",
++			attribs->width, attribs->height);
++		wlr_dmabuf_attributes_finish(attribs);
++		return NULL;
++	}
++	if (attribs->n_planes < 1 || attribs->fd[0] < 0) {
++		wlr_log(WLR_ERROR, "wlr_dmabuf_v1_buffer_create_immed: no valid plane fd");
++		wlr_dmabuf_attributes_finish(attribs);
++		return NULL;
++	}
++	struct wlr_dmabuf_v1_buffer *buffer = calloc(1, sizeof(*buffer));
++	if (!buffer) {
++		wlr_dmabuf_attributes_finish(attribs);
++		return NULL;
++	}
++	wlr_buffer_init(&buffer->base, &buffer_impl, attribs->width, attribs->height);
++	buffer->resource = wl_resource_create(client, &wl_buffer_interface,
++		1, buffer_id);
++	if (!buffer->resource) {
++		wlr_dmabuf_attributes_finish(attribs);
++		free(buffer);
++		return NULL;
++	}
++	wl_resource_set_implementation(buffer->resource,
++		&wl_buffer_impl, buffer, buffer_handle_resource_destroy);
++	buffer->attributes = *attribs;
++	buffer->release.notify = buffer_handle_release;
++	wl_signal_add(&buffer->base.events.release, &buffer->release);
++	return buffer->resource;
++}
