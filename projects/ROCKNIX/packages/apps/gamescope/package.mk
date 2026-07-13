@@ -16,6 +16,17 @@ GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="meson"
 PKG_DEPENDS_HOST="toolchain:host wayland:host wayland-protocols:host glslang:host"
 
+# Rockchip handhelds with a Mali GPU also need the libMali/panfrost + RGA2 scanout
+# patches (patches/libmali) and the matching librga / rockchip wlroots, mirroring the
+# wlroots libmali gating. All other devices build the stock gamescope unaffected.
+case ${DEVICE} in
+  RK3326|RK3566|RK3576)
+    PKG_DEPENDS_TARGET+=" librga wlroots"
+    PKG_PATCH_DIRS+=" libmali"
+    PKG_LONGDESC="SteamOS session compositing window manager (micro-compositor for games / nested Wayland), with Rockchip Mali support (libMali/panfrost, RGA2 offload)."
+    ;;
+esac
+
 configure_package() {
   if [ "${VULKAN_SUPPORT}" = "yes" ]; then
     PKG_DEPENDS_TARGET+=" ${VULKAN}"
